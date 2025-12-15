@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangalam - Apne Gao Ka Apna Bazar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kurale&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'village-clay': '#D97706', 'village-cream': '#FFFBEB',
+                        'village-green': '#15803D', 'village-brown': '#78350F',
+                    },
+                    fontFamily: {
+                        'brand': ['Kurale', 'serif'], 'body': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-active { border-bottom: 3px solid #FFFBEB; opacity: 1 !important; }
+    </style>
+</head>
+<body class="bg-village-cream font-body text-gray-800 flex flex-col min-h-screen">
+
+    <header class="sticky top-0 z-50 bg-village-clay shadow-lg text-white">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <div class="text-center md:text-left cursor-pointer flex justify-between w-full md:w-auto items-center">
+                    <div onclick="showHome()">
+                        <h1 class="text-3xl font-brand font-bold tracking-wide flex items-center">
+                            <i class="fa-solid fa-om mr-2"></i>MANGALAM
+                        </h1>
+                        <p class="text-yellow-100 text-xs italic tracking-wider" id="tagline">Apne gao ka apna bazar</p>
+                    </div>
+                    <button onclick="toggleLang()" class="md:hidden border border-white px-2 py-1 rounded text-xs font-bold">
+                        <i class="fa-solid fa-language"></i> <span id="lang-btn-mobile">HI</span>
+                    </button>
+                </div>
+
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="search-input" onkeyup="globalSearch()" placeholder="Search items..." class="w-full py-2 px-4 rounded-full outline-none text-gray-700 shadow-inner text-sm">
+                    <button class="absolute right-2 top-1 h-8 w-8 bg-village-clay text-white rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-5 font-semibold">
+                    <button onclick="toggleLang()" class="hidden md:block border border-white/50 hover:bg-white/10 px-3 py-1 rounded text-xs font-bold transition">
+                        <i class="fa-solid fa-language"></i> <span id="lang-btn-desktop">HINDI</span>
+                    </button>
+
+                    <div onclick="showPage('location')" class="cursor-pointer opacity-80 hover:opacity-100 flex flex-col items-center">
+                        <i class="fa-solid fa-map-location-dot text-xl"></i>
+                        <span class="text-[10px]" data-translate="shop">Shop</span>
+                    </div>
+                    <div onclick="showPage('cart')" class="relative cursor-pointer opacity-80 hover:opacity-100 flex flex-col items-center">
+                        <div class="relative">
+                            <i class="fa-solid fa-cart-shopping text-xl"></i>
+                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-white text-village-clay text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center border border-village-clay">0</span>
+                        </div>
+                        <span class="text-[10px]" data-translate="cart">Cart</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 flex gap-6 overflow-x-auto scroll-hide border-t border-white/20 pt-2 pb-1 text-sm font-medium whitespace-nowrap">
+                <button onclick="showHome()" id="nav-home" class="opacity-70 hover:opacity-100 transition pb-1 nav-active" data-translate="home">Home</button>
+                <button onclick="filterCategory('grocery')" id="nav-grocery" class="opacity-70 hover:opacity-100 transition pb-1" data-translate="grocery">Grocery</button>
+                <button onclick="filterCategory('ayurvedic')" id="nav-ayurvedic" class="opacity-70 hover:opacity-100 transition pb-1" data-translate="ayurvedic">Ayurvedic</button>
+                <button onclick="filterCategory('electronics')" id="nav-electronics" class="opacity-70 hover:opacity-100 transition pb-1" data-translate="electronics">Electronics</button>
+                <button onclick="showPage('services')" id="nav-services" class="opacity-70 hover:opacity-100 transition pb-1 text-yellow-200" data-translate="services">Electrical Services</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6 flex-grow">
+        <div id="product-view" class="fade-in">
+            <div id="home-banner" class="rounded-lg overflow-hidden shadow-md mb-8 bg-gradient-to-r from-orange-200 to-yellow-100 flex items-center justify-between p-6 md:p-10">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-brand text-village-brown font-bold mb-2" data-translate="bannerTitle">Welcome to Mangalam</h2>
+                    <p class="text-gray-700 text-sm"><span data-translate="useCode">Use code</span> <strong>MANGALAM10</strong> <span data-translate="forDiscount">for discount!</span></p>
+                </div>
+                <div class="text-5xl text-village-clay opacity-80"><i class="fa-solid fa-shop"></i></div>
+            </div>
+            <h3 id="page-title" class="text-xl font-bold text-gray-800 mb-4 border-l-4 border-village-clay pl-3">All Products</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-10" id="products-container"></div>
+        </div>
+
+        <div id="services-view" class="hidden fade-in">
+            <h2 class="text-2xl font-brand font-bold text-village-brown mb-6 border-b pb-2" data-translate="servicesTitle">Expert Electrical Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-red-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="bg-red-100 p-3 rounded-full text-red-600 text-2xl"><i class="fa-solid fa-fan"></i></div>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-1 rounded">Repair</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-800">Fan & Motor Repair</h3>
+                    <p class="text-xs text-gray-500 mt-1">Coil winding, bearing replacement.</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="text-village-clay font-bold text-lg">₹349+</span>
+                        <button onclick="bookServiceOnWhatsapp('Fan & Motor Repair')" class="bg-green-600 text-white text-xs px-3 py-2 rounded hover:bg-green-700 flex items-center gap-2 font-bold"><i class="fa-brands fa-whatsapp"></i> Book</button>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full text-blue-600 text-2xl"><i class="fa-solid fa-plug"></i></div>
+                        <span class="bg-gray-100 text-gray-800 text-xs font-bold px-2 py-1 rounded">Checkup</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-800">House Wiring Check</h3>
+                    <p class="text-xs text-gray-500 mt-1">Fault detection, safety check.</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="text-village-clay font-bold text-lg">₹99</span>
+                        <button onclick="bookServiceOnWhatsapp('House Wiring Check')" class="bg-green-600 text-white text-xs px-3 py-2 rounded hover:bg-green-700 flex items-center gap-2 font-bold"><i class="fa-brands fa-whatsapp"></i> Book</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cart-view" class="hidden fade-in">
+            <h2 class="text-2xl font-brand font-bold text-village-brown mb-6" data-translate="cartTitle">Your Shopping Cart</h2>
+            <div class="flex flex-col lg:flex-row gap-8">
+                <div class="w-full lg:w-2/3">
+                    <div id="cart-items-container" class="space-y-3"></div>
+                    <div id="empty-cart-msg" class="text-center py-10 bg-white rounded shadow-sm">
+                        <p class="text-gray-500" data-translate="emptyCart">Your cart is empty.</p>
+                        <button onclick="showHome()" class="mt-4 text-village-clay underline font-bold" data-translate="backToShop">Back to Shop</button>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/3">
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 sticky top-24">
+                        <div class="mb-4 pb-4 border-b">
+                            <label class="text-xs font-bold text-gray-600 mb-1 block" data-translate="couponLabel">Have a Coupon?</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="coupon-input" placeholder="MANGALAM10" class="w-full border rounded p-2 text-sm uppercase">
+                                <button onclick="applyCoupon()" class="bg-gray-800 text-white text-xs px-4 rounded font-bold" data-translate="apply">APPLY</button>
+                            </div>
+                            <p id="coupon-msg" class="text-xs mt-1 hidden"></p>
+                        </div>
+
+                        <h3 class="font-bold text-lg mb-4" data-translate="orderSummary">Order Summary</h3>
+                        <div class="flex justify-between mb-2 text-sm"><span>Subtotal</span><span id="cart-subtotal">₹0</span></div>
+                        <div class="flex justify-between mb-2 text-sm text-green-600 hidden" id="discount-row"><span>Discount</span><span id="cart-discount">-₹0</span></div>
+                        <div class="flex justify-between mb-4 font-bold text-lg border-t pt-2"><span>Total</span><span id="cart-total" class="text-village-clay">₹0</span></div>
+
+                        <form onsubmit="placeOrderWhatsApp(event)" class="space-y-3">
+                            <input id="cust-name" required type="text" class="w-full border rounded p-2 text-sm" placeholder="Name / नाम">
+                            <input id="cust-phone" required type="tel" class="w-full border rounded p-2 text-sm" placeholder="Phone / फोन">
+                            <textarea id="cust-address" required rows="2" class="w-full border rounded p-2 text-sm" placeholder="Address / पता (Village, Landmark)"></textarea>
+                            
+                            <button type="submit" id="checkout-btn" disabled class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded shadow transition flex items-center justify-center gap-2 disabled:opacity-50">
+                                <i class="fa-brands fa-whatsapp text-xl"></i> <span data-translate="orderBtn">Order on WhatsApp</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="location-view" class="hidden fade-in">
+            <h2 class="text-2xl font-brand font-bold text-village-brown mb-6" data-translate="locationTitle">Our Location</h2>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <p class="font-bold text-lg mb-2">Maa Vindaa Vidya Niketen Area</p>
+                <p class="text-gray-600 mb-4 text-sm">Pahsara West, Bihar 851127</p>
+                <div class="w-full h-80 bg-gray-200 rounded overflow-hidden">
+                    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q=Maa+Vindaa+Vidya+Niketen,+Pahsara+West,+Bihar+851127&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <a href="tel:919876543210" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-blue-700 animate-bounce">
+        <i class="fa-solid fa-phone text-xl"></i>
+    </a>
+
+    <footer class="bg-village-brown text-yellow-100 py-6 text-center mt-auto">
+        <h2 class="font-brand text-xl">MANGALAM</h2>
+        <p class="text-xs opacity-70 mb-2">Apne gao ka apna bazar</p>
+    </footer>
+
+    <script>
+        const SHOP_PHONE_NUMBER = "919876543210"; 
+        let currentLang = 'en'; // 'en' or 'hi'
+
+        // TRANSLATION DICTIONARY
+        const translations = {
+            shop: { en: "Shop", hi: "दुकान" },
+            cart: { en: "Cart", hi: "झोला" },
+            home: { en: "Home", hi: "घर" },
+            grocery: { en: "Grocery", hi: "किराना" },
+            ayurvedic: { en: "Ayurvedic", hi: "आयुर्वेदिक" },
+            electronics: { en: "Electronics", hi: "बिजली सामान" },
+            services: { en: "Services", hi: "सेवाएं" },
+            bannerTitle: { en: "Welcome to Mangalam", hi: "मंगलम में आपका स्वागत है" },
+            useCode: { en: "Use code", hi: "कोड उपयोग करें" },
+            forDiscount: { en: "for discount!", hi: "छूट के लिए!" },
+            servicesTitle: { en: "Expert Electrical Services", hi: "विशेषज्ञ बिजली सेवाएं" },
+            cartTitle: { en: "Your Shopping Cart", hi: "आपकी खरीदारी की टोकरी" },
+            emptyCart: { en: "Your cart is empty.", hi: "आपका झोला खाली है।" },
+            backToShop: { en: "Back to Shop", hi: "दुकान पर वापस जाएं" },
+            couponLabel: { en: "Have a Coupon?", hi: "कूपन कोड है?" },
+            apply: { en: "APPLY", hi: "लागू करें" },
+            orderSummary: { en: "Order Summary", hi: "ऑर्डर सारांश" },
+            orderBtn: { en: "Order on WhatsApp", hi: "व्हाट्सएप पर ऑर्डर करें" },
+            locationTitle: { en: "Our Location", hi: "हमारा स्थान" }
+        };
+
+        const allProducts = [
+            { id: 1, name: "Chyawanprash (1kg)", nameHi: "च्यवनप्राश (1 किलो)", category: "ayurvedic", price: 350, icon: "fa-jar", color: "text-amber-700" },
+            { id: 2, name: "Organic Turmeric", nameHi: "जैविक हल्दी", category: "grocery", price: 80, icon: "fa-mortar-pestle", color: "text-yellow-500" },
+            { id: 3, name: "Desi Ghee (500ml)", nameHi: "देसी घी (500 मिली)", category: "grocery", price: 550, icon: "fa-bottle-droplet", color: "text-yellow-600" },
+            { id: 4, name: "LED Bulb 9W", nameHi: "एलईडी बल्ब 9W", category: "electronics", price: 90, icon: "fa-lightbulb", color: "text-blue-500" },
+            { id: 5, name: "Extension Board", nameHi: "एक्सटेंशन बोर्ड", category: "electronics", price: 450, icon: "fa-plug", color: "text-gray-700" },
+            { id: 6, name: "Mobile Charger", nameHi: "मोबाइल चार्जर", category: "electronics", price: 250, icon: "fa-bolt", color: "text-green-600" },
+            { id: 7, name: "Basmati Rice (5kg)", nameHi: "बासमती चावल (5 किलो)", category: "grocery", price: 600, icon: "fa-bowl-rice", color: "text-gray-400" },
+            { id: 8, name: "Headphones", nameHi: "हेडफ़ोन", category: "electronics", price: 899, icon: "fa-headphones", color: "text-red-500" },
+            { id: 9, name: "Neem Soap", nameHi: "नीम साबुन", category: "ayurvedic", price: 45, icon: "fa-leaf", color: "text-green-500" },
+            { id: 10, name: "Ceiling Fan", nameHi: "छत का पंखा", category: "electronics", price: 1400, icon: "fa-fan", color: "text-blue-800" },
+            { id: 11, name: "Mustard Oil (1L)", nameHi: "सरसों तेल (1 लीटर)", category: "grocery", price: 160, icon: "fa-bottle-water", color: "text-yellow-600" },
+            { id: 12, name: "Ayurvedic Pain Oil", nameHi: "दर्द निवारक तेल", category: "ayurvedic", price: 120, icon: "fa-flask", color: "text-red-400" },
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('mangalamCart')) || [];
+        let appliedDiscount = 0;
+
+        window.onload = function() { showHome(); updateCartCount(); };
+
+        // --- LANGUAGE TOGGLE ---
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            
+            // Update Button Text
+            document.getElementById('lang-btn-desktop').innerText = currentLang === 'en' ? 'HINDI' : 'ENGLISH';
+            document.getElementById('lang-btn-mobile').innerText = currentLang === 'en' ? 'HI' : 'EN';
+
+            // Translate Static UI
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if(translations[key]) el.innerText = translations[key][currentLang];
+            });
+
+            // Re-render products to update names
+            const activeNav = document.querySelector('.nav-active');
+            if(activeNav && activeNav.id === 'nav-grocery') filterCategory('grocery');
+            else if(activeNav && activeNav.id === 'nav-ayurvedic') filterCategory('ayurvedic');
+            else if(activeNav && activeNav.id === 'nav-electronics') filterCategory('electronics');
+            else showHome(); // Defaults to home/search logic
+            
+            // Re-render cart if visible
+            if(!document.getElementById('cart-view').classList.contains('hidden')) renderCart();
+        }
+
+        // --- NAVIGATION ---
+        function hideAllViews() {
+            ['product-view', 'cart-view', 'services-view', 'location-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.querySelectorAll('header button').forEach(btn => btn.classList.remove('nav-active'));
+        }
+
+        function showHome() {
+            hideAllViews();
+            document.getElementById('product-view').classList.remove('hidden');
+            document.getElementById('home-banner').classList.remove('hidden');
+            document.getElementById('nav-home').classList.add('nav-active');
+            renderProducts(allProducts);
+        }
+
+        function filterCategory(category) {
+            hideAllViews();
+            document.getElementById('product-view').classList.remove('hidden');
+            document.getElementById('home-banner').classList.add('hidden');
+            document.getElementById('nav-' + category).classList.add('nav-active');
+            renderProducts(allProducts.filter(p => p.category === category));
+        }
+
+        function showPage(pageId) {
+            hideAllViews();
+            document.getElementById(pageId + '-view').classList.remove('hidden');
+            if(pageId === 'cart') renderCart();
+            const navBtn = document.getElementById('nav-' + pageId);
+            if(navBtn) navBtn.classList.add('nav-active');
+        }
+
+        // --- RENDER PRODUCTS (UPDATED FOR LANG & SHARE) ---
+        function renderProducts(list) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = "";
+            if(list.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">No items found.</div>`; return; }
+            
+            list.forEach(p => {
+                const displayName = currentLang === 'hi' && p.nameHi ? p.nameHi : p.name;
+                
+                container.innerHTML += `
+                    <div class="bg-white rounded hover:shadow-lg transition border border-gray-100 p-3 flex flex-col relative">
+                        <span class="absolute top-2 right-2 text-[10px] font-bold text-gray-300 uppercase">${p.category}</span>
+                        <div class="h-28 w-full bg-gray-50 rounded flex items-center justify-center mb-2">
+                            <i class="fa-solid ${p.icon} text-3xl ${p.color}"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-semibold text-sm text-gray-800 leading-tight">${displayName}</h4>
+                            <p class="text-green-700 font-bold text-sm mt-1">₹${p.price}</p>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="addToCart(${p.id}, this)" class="flex-grow bg-yellow-500 hover:bg-yellow-600 text-white font-medium text-xs py-2 rounded shadow-sm transition active:scale-95">Add +</button>
+                            <button onclick="shareProduct('${displayName}', ${p.price})" class="w-8 bg-green-100 text-green-600 rounded flex items-center justify-center hover:bg-green-200"><i class="fa-brands fa-whatsapp"></i></button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function globalSearch() {
+            hideAllViews();
+            document.getElementById('product-view').classList.remove('hidden');
+            document.getElementById('home-banner').classList.add('hidden');
+            const q = document.getElementById('search-input').value.toLowerCase();
+            // Search in both English and Hindi names
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(q) || 
+                (p.nameHi && p.nameHi.includes(q))
+            );
+            renderProducts(filtered);
+        }
+
+        // --- SHARE LOGIC ---
+        function shareProduct(name, price) {
+            const text = `Look at this item at Mangalam Shop: ${name} for only ₹${price}. Order here: https://mangalam-shop.com`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        // --- CART LOGIC ---
+        function addToCart(id, btnElement) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) { existingItem.qty++; } 
+            else { 
+                const product = allProducts.find(p => p.id === id);
+                cart.push({ ...product, qty: 1 });
+            }
+            saveCart();
+            updateCartCount();
+            if(btnElement) {
+                const originalText = btnElement.innerText;
+                btnElement.innerText = "✔";
+                btnElement.classList.replace("bg-yellow-500", "bg-green-600");
+                setTimeout(() => {
+                    btnElement.innerText = originalText;
+                    btnElement.classList.replace("bg-green-600", "bg-yellow-500");
+                }, 800);
+            }
+        }
+
+        function updateCartQty(id, change) {
+            const itemIndex = cart.findIndex(item => item.id === id);
+            if (itemIndex > -1) {
+                cart[itemIndex].qty += change;
+                if (cart[itemIndex].qty <= 0) cart.splice(itemIndex, 1);
+                saveCart();
+                renderCart();
+                updateCartCount();
+            }
+        }
+
+        function saveCart() { localStorage.setItem('mangalamCart', JSON.stringify(cart)); }
+        function updateCartCount() {
+            const count = cart.reduce((acc, item) => acc + item.qty, 0);
+            document.getElementById('cart-badge').innerText = count;
+        }
+
+        // --- CHECKOUT LOGIC ---
+        function applyCoupon() {
+            const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+            const msg = document.getElementById('coupon-msg');
+            if(code === "MANGALAM10") {
+                appliedDiscount = 0.10;
+                msg.innerText = "Success! 10% Discount Applied.";
+                msg.className = "text-xs mt-1 text-green-600 block";
+            } else {
+                appliedDiscount = 0;
+                msg.innerText = "Invalid Coupon Code";
+                msg.className = "text-xs mt-1 text-red-500 block";
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = "";
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                document.getElementById('empty-cart-msg').classList.remove('hidden');
+                document.getElementById('checkout-btn').disabled = true;
+                document.getElementById('cart-total').innerText = "₹0";
+            } else {
+                document.getElementById('empty-cart-msg').classList.add('hidden');
+                document.getElementById('checkout-btn').disabled = false;
+                
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.qty;
+                    subtotal += itemTotal;
+                    // Use Hindi name in cart if mode is Hindi
+                    const displayName = currentLang === 'hi' && item.nameHi ? item.nameHi : item.name;
+
+                    container.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-3 rounded border shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-gray-500 text-lg">
+                                    <i class="fa-solid ${item.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm">${displayName}</h4>
+                                    <p class="text-xs text-gray-500">₹${item.price} x ${item.qty}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center border rounded">
+                                    <button onclick="updateCartQty(${item.id}, -1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold">-</button>
+                                    <span class="px-2 text-xs font-bold">${item.qty}</span>
+                                    <button onclick="updateCartQty(${item.id}, 1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold">+</button>
+                                </div>
+                                <span class="font-bold text-sm text-gray-800 w-12 text-right">₹${itemTotal}</span>
+                            </div>
+                        </div>`;
+                });
+            }
+
+            const discountAmount = Math.round(subtotal * appliedDiscount);
+            const finalTotal = subtotal - discountAmount;
+            document.getElementById('cart-subtotal').innerText = "₹" + subtotal;
+            if (discountAmount > 0) {
+                document.getElementById('discount-row').classList.remove('hidden');
+                document.getElementById('cart-discount').innerText = "-₹" + discountAmount;
+            } else {
+                document.getElementById('discount-row').classList.add('hidden');
+            }
+            document.getElementById('cart-total').innerText = "₹" + finalTotal;
+        }
+
+        function placeOrderWhatsApp(e) {
+            e.preventDefault();
+            if(cart.length === 0) return;
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const address = document.getElementById('cust-address').value;
+            const finalTotal = document.getElementById('cart-total').innerText;
+            
+            let itemList = "";
+            cart.forEach(item => {
+                const displayName = currentLang === 'hi' && item.nameHi ? item.nameHi : item.name;
+                itemList += `%0A• ${item.qty} x ${displayName}`;
+            });
+            let discountNote = appliedDiscount > 0 ? "%0A(Coupon MANGALAM10 Applied ✅)" : "";
+            const message = `*New Order* 🛒%0A%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*Address:* ${address}%0A%0A*Items:*${itemList}%0A%0A*Pay:* ${finalTotal} ${discountNote}`;
+            window.open(`https://wa.me/${SHOP_PHONE_NUMBER}?text=${message}`, '_blank');
+        }
+
+        function bookServiceOnWhatsapp(serviceName) {
+            const message = `*Service Request* 🛠️%0A%0AI want to book: *${serviceName}*%0A%0APlease contact me.`;
+            window.open(`https://wa.me/${SHOP_PHONE_NUMBER}?text=${message}`, '_blank');
+        }
+    </script>
+</body>
+</html>
